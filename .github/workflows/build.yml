@@ -1,11 +1,5 @@
 name: Build SkUtils APK
 
-# Phone se build karne ke liye:
-#   1. Is file ko repo me .github/workflows/build.yml par rakho
-#   2. skutils.zip ko repo ke root me upload kar do (as single file)
-#   3. Actions tab -> "Build SkUtils APK" -> "Run workflow"
-#   4. 2-4 min baad "Artifacts" me APK milega
-
 on:
   push:
     branches: [ main, master ]
@@ -23,14 +17,15 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Unzip project
+      - name: Unzip project (if zipped)
         run: |
-          unzip -o skutils.zip -d extracted
-          # handle both: zip containing a top-level "skutils" folder, or files directly
-          if [ -d "extracted/skutils" ]; then
-            cp -r extracted/skutils/. .
-          else
-            cp -r extracted/. .
+          if [ -f skutils.zip ]; then
+            unzip -o skutils.zip -d extracted
+            if [ -d "extracted/skutils" ]; then
+              cp -r extracted/skutils/. .
+            else
+              cp -r extracted/. .
+            fi
           fi
 
       - name: Set up JDK 17
@@ -39,13 +34,13 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
 
       - name: Install Android SDK components
         run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Set up Gradle (no wrapper committed)
         uses: gradle/actions/setup-gradle@v4
