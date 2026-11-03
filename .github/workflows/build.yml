@@ -1,4 +1,4 @@
-herename: Build SkUtils APK
+name: Build SkUtils APK
 
 # Phone se build karne ke liye:
 #   1. Is file ko repo me .github/workflows/build.yml par rakho
